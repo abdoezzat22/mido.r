@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Operations Research Quiz</title>
+<style>
+:root{color-scheme:dark;--bg:#0a1833;--surface:#10264f;--text:#f6efd8;--muted:#b9c2d9;--line:#2c4a85;--ok:#3ccf76;--okbg:#14402a;--bad:#ff6b6b;--badbg:#472020;--accent:#e3b53c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{scroll-padding-top:90px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;line-height:1.5}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:12px 16px;border-bottom:2px solid var(--accent)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.bar{max-width:760px;margin:0 auto;display:flex;gap:10px;align-items:stretch}
+.box{flex:1;border-radius:10px;padding:8px 12px;text-align:center;border:2px solid}
+.box b{display:block;font-size:26px;line-height:1.1}
+.box span{font-size:13px}
+.right{border-color:var(--ok);color:var(--ok)}
+.wrong{border-color:var(--bad);color:var(--bad)}
+.reset{border:1px solid var(--accent);background:var(--surface);color:var(--text);border-radius:10px;padding:0 14px;font-size:14px;cursor:pointer}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:26px;margin:4px 0 2px;color:var(--accent);text-align:center}
+.sub{text-align:center;color:var(--muted);margin:0 0 16px;font-size:14px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.q h2{font-size:17px;margin:0 0 12px;font-weight:600}
+.opt{display:block;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--ok);background:var(--okbg);color:#c6f7d9;font-weight:600}
+.opt.bad{border-color:var(--bad);background:var(--badbg);color:#ffd0d0;font-weight:600}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .opt.ok{background:#17402a;color:#b9f5d0}:root:not([data-theme="light"]) .opt.bad{background:#472020;color:#ffc9c9}}
+:root[data-theme="dark"] .opt.ok{background:#17402a;color:#b9f5d0}:root[data-theme="dark"] .opt.bad{background:#472020;color:#ffc9c9}
+.tabs{display:flex;gap:8px;margin-bottom:12px}.tab{flex:1;font:inherit;font-weight:600;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}.tab.on{border-color:var(--accent);color:var(--accent)}.tab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sec{color:var(--accent);font-size:20px;margin:22px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.done{display:none;text-align:center;font-size:20px;font-weight:600;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<div class="box right"><b id="r">0</b><span>صح</span></div>
+<div class="box wrong"><b id="w">0</b><span>غلط</span></div>
+<button class="reset" id="reset">إعادة</button>
+</div></header>
+<main>
+<h1 id="ttl">أسئلة البنك والمحاضرات</h1>
+<p class="sub" id="sub">Operations Research — 75 questions</p>
+<div id="list"></div>
+<div class="done" id="done"></div>
+</main>
+<script>
+const BANK=[
+["Operations Research is mainly about:",["Guessing","Supporting decisions using mathematical models","Drawing charts only","Programming only"],1],
+["In linear programming, the objective can be to:",["Maximize or minimize","Only maximize","Only minimize","Neither"],0],
+["Decision variables in LP represent:",["Known data","Quantities we want to determine (like x1, x2)","Constraints","Slack variables"],1],
+["A constraint written 2x1 + x2 ≤ 18 means:",["We cannot use more than 18 units of that resource","We must use exactly 18","Ignore 18","18 is the optimal value"],0],
+["In graphical LP (2 variables), an optimal solution — if it exists — occurs:",["At a corner (extreme) point","At any random point","Outside the feasible region","Only at (0,0)"],0],
+["A transportation problem is balanced when:",["All costs are equal","Total supply = total demand","Number of sources = number of destinations","There is a dummy"],1],
+["In a transportation model, the variable x_ij usually means:",["Cost from i to j","Units shipped from source i to destination j","Demand at j","Supply at i"],1],
+["If total supply > total demand, we:",["Add a dummy destination with 0 cost","Add a dummy source","Cannot solve","Delete a source"],0],
+["VAM (Vogel’s Approximation Method) chooses the row/column with:",["Highest cost","Highest penalty (difference of two smallest costs)","Highest supply","Highest demand"],1],
+["MODI (u–v) method is mainly for:",["Checking and improving a transportation solution","Getting the first solution","Balancing supplies","Adding dummy"],0],
+["A prohibited lane (like S1→D4) is modeled by:",["Giving it a huge cost or forcing x_ij = 0","Doubling demand","Removing a source","Adding a dummy"],0],
+["A capacity cap such as x_34 ≤ 30 is:",["An extra constraint on one cell","A dummy variable","A cost change","A MODI variable"],0],
+["If all improvement indices (Δ) in MODI are ≥ 0, the current solution is:",["Infeasible","Optimal","Unbalanced","Degenerate"],1],
+["In simplex (max problem), we stop when:",["All numbers in the Z-row (for nonbasic vars) are ≥ 0","All RHS are 0","All slacks are 0","We get a dummy"],0],
+["Consider: Max Z = 4x1 + 3x2 s.t. x1 + x2 ≤ 6, x1 ≤ 4, x2 ≤ 4, x1,x2 ≥ 0. Which point is NOT feasible?",["(0,0)","(4,2)","(2,4)","(5,1)"],3],
+["A constraint of the form 2x1 + 5x2 ≥ 40 is converted to standard form by:",["Adding slack","Subtracting a surplus and adding an artificial variable","Doing nothing","Reversing inequality only"],1],
+["In a 4×5 transportation problem, to avoid degeneracy the number of basic cells should be:",["4×5 = 20","4+5 = 9","4+5−1 = 8","5−4 = 1"],2],
+["When VAM selects a row, but that row has a prohibited cell in the cheapest position, we should:",["Stop","Skip that cell and take the next allowable cheapest","Change the penalty","Add dummy"],1],
+["In the regional dispatch example, “S1→D4 prohibited” and “S3→D4 ≤ 30” mean the model is:",["A pure transportation model with extra constraints","Not a transportation model anymore","An assignment model","A balanced LP only"],0],
+["In MODI, the improvement index is computed as:",["Δ_ij = (u_i + v_j) − c_ij","Δ_ij = c_ij − (u_i + v_j)","Δ_ij = supply − demand","Δ_ij = u_i − v_j"],1],
+["If a transportation problem has supply < demand, to balance it we:",["Add dummy destination","Add dummy source","Add capacity cap","Add prohibited lane"],1],
+["In the transportation improvement loop, we assign + and − signs along the closed path to:",["Keep the same total shipped from each source and to each destination","Change the costs","Remove dummies","Increase demand"],0],
+["In a graphical LP, if the objective line is parallel to a binding constraint and overlaps a segment:",["There are multiple (alternate) optimal solutions","No solution","It is unbounded","It is degenerate only"],0],
+["In simplex, the entering variable is chosen because:",["Its coefficient in the Z-row can improve the objective","It has the smallest RHS","It has 0 coefficient","It is a slack variable"],0],
+["In the unbalanced transportation example, the dummy destination’s allocation represents:",["Actual shipped goods","Unused supply","Extra demand","Prohibited lane"],1]
+];
+const LEC=[
+["Decision variables in an LP are:",["Quantities we control, e.g., x₁, x₂","Fixed resource limits (RHS values)","Profit per unit of each product","Slack and surplus variables only"],0],
+["Which of these is NOT one of the four LP assumptions?",["Proportionality","Additivity","Divisibility","Randomness"],3],
+["The standard form of a Max LP problem is:",["Ax ≤ b, x ≥ 0","Ax ≥ b, x ≤ 0","Ax = b, x free","Ax ≥ b, x unrestricted"],0],
+["A ≤ constraint is converted to an equality by:",["Adding a slack variable (Ax + s = b, s ≥ 0)","Subtracting a surplus variable","Adding an artificial variable","Multiplying by −1"],0],
+["A ≥ constraint in Simplex is handled by:",["Adding a slack variable only","Subtracting a surplus and adding an artificial variable (Big-M or Two-Phase)","Ignoring it","Dividing both sides by 2"],1],
+["Min Z = 7x₁ + 4x₂ is converted to a Max problem as:",["Max (−7x₁ − 4x₂)","Max (7x₁ + 4x₂)","Max (−7x₁ + 4x₂)","Max 1/(7x₁ + 4x₂)"],0],
+["A free (unrestricted) variable x₁ is replaced by:",["x₁ = x₁⁺ − x₁⁻, with x₁⁺, x₁⁻ ≥ 0","x₁ = 0","x₁ = −x₂","x₁ = x₁⁺ + x₁⁻"],0],
+["The Phase I objective in the Two-Phase method is:",["Min (sum of artificial variables)","Max the original Z","Min (sum of slack variables)","Max (sum of artificial variables)"],0],
+["If the Phase I optimum equals 0, then:",["The problem is feasible; proceed to optimize the original Z","The problem is infeasible","The problem is unbounded","The solution is already optimal"],0],
+["Max Z = 3x₁ + 5x₂ s.t. 2x₁ + x₂ ≤ 18; x₁ + 3x₂ ≤ 24; x ≥ 0. The optimal point is:",["(6,6)","(9,0)","(0,8)","(0,0)"],0],
+["For the same problem, the maximum value of Z is:",["27","40","48","54"],2],
+["If the objective line overlaps an edge of the feasible region, we have:",["Alternate optima","Infeasibility","Unboundedness","Degeneracy"],0],
+["If no point satisfies all constraints, the problem is:",["Infeasible","Unbounded","Alternate optima","Degenerate"],0],
+["An unbounded Max problem means:",["The feasible region is open in the improving direction and Z increases without bound","The feasible region is empty","The objective line is parallel to an edge","A basic variable becomes zero"],0],
+["Degeneracy occurs when:",["Multiple constraints meet at a corner and a basic variable becomes zero","There is no feasible region","Z increases without bound","Two corners are both optimal"],0],
+["In Simplex (Max), the entering variable is the one with:",["The most negative Z-row coefficient","The largest positive Z-row coefficient","The smallest RHS","Any slack variable"],0],
+["In Simplex, the leaving variable is chosen by:",["The minimum positive ratio test","The maximum ratio","The largest RHS","The most negative ratio"],0],
+["Max Z = 4x₁ + 3x₂ s.t. 2x₁ + x₂ ≤ 16; x₁ + 2x₂ ≤ 14. In the first pivot:",["x₁ enters and s₁ leaves (ratio 16/2 = 8)","x₂ enters and s₂ leaves","x₁ enters and s₂ leaves","x₂ enters and s₁ leaves"],0],
+["The optimal solution of that same problem is:",["x₁ = 6, x₂ = 4, Z = 36","x₁ = 8, x₂ = 0, Z = 32","x₁ = 0, x₂ = 7, Z = 21","x₁ = 4, x₂ = 6, Z = 34"],0],
+["An unbounded Max problem shows in the tableau as:",["A non-positive pivot column where no positive ratios exist","All Z-row values ≥ 0","All RHS values = 0","Ties in the ratio test"],0],
+["The objective of the transportation model is to:",["Minimize total transportation cost","Maximize units shipped","Maximize total supply","Minimize the number of routes"],0],
+["Supply = 120 and demand = 100. We add a dummy destination with demand:",["20","100","120","0"],0],
+["In Example 1 (supply [30,50,20], demand [20,40,40]), total supply = total demand = :",["100","90","110","120"],0],
+["The Least Cost Method starts by selecting:",["The cell with the lowest cost","The cell with the highest cost","The cell with the largest supply","The top-left corner cell"],0],
+["In MODI, the potentials u and v are computed from:",["BASIC cells, using c_ij = u_i + v_j","NON-basic cells only","All cells with equal cost","The supply values only"],0],
+["The number of equations solved to get all u_i and v_j is:",["m + n − 1","m × n","m + n","m − n"],0],
+["The reduced cost of an empty cell in MODI is:",["Δ_ij = c_ij − (u_i + v_j)","Δ_ij = (u_i + v_j) − c_ij","Δ_ij = u_i − v_j","Δ_ij = c_ij + u_i + v_j"],0],
+["With u₂ = −3, v₃ = 5 and c₂₃ = 1, the reduced cost Δ₂₃ equals:",["−1","4","1","−2"],0],
+["In the closed loop, θ equals:",["The minimum shipment on the cells marked −","The maximum shipment on the cells marked +","The sum of all shipments in the loop","The cost of the entering cell"],0],
+["In the worked 2×3 example (θ = 10), which cell leaves the basis?",["(1,3), because x₁₃ becomes 0","(2,2)","(1,1)","(1,2)"],0]
+];
+const L5=[
+["In the Regional Supply Dispatch base data, total supply = total demand = :",["160","170","180","150"],1],
+["Which lane is prohibited in the base data?",["S3→D4","S2→D5","S1→D4","S4→D1"],2],
+["The capacity cap in the base data is on:",["S1→D4 ≤ 30","S3→D4 ≤ 30","S2→D5 ≤ 30","S4→D3 ≤ 30"],1],
+["A prohibited lane such as S1→D4 is modeled by:",["Setting x₁₄ ≥ 30","Doubling the demand at D4","Setting x₁₄ = 0 (treating the cell as unavailable)","Adding a dummy source"],2],
+["If Σ supply > Σ demand, we add:",["A dummy source","A dummy demand with cost 0 (or a penalty)","A prohibited lane","A capacity cap"],1],
+["If Σ demand > Σ supply, we add:",["A dummy supply","A dummy demand","Nothing, the problem is infeasible","A second cap"],0],
+["A VAM penalty for a row or column is the difference between:",["The largest and the smallest cost","Supply and demand","The two smallest admissible costs","The two largest costs"],2],
+["VAM selects the row or column with:",["The smallest penalty","The largest penalty","The largest supply","The smallest demand"],1],
+["After choosing a row or column, VAM allocates as much as possible to:",["The lowest admissible cost cell in it","The highest cost cell in it","The first cell on the left","A random cell"],0],
+["The Northwest Corner method is:",["Cost-aware and usually optimal","Fastest and feasible, but not cost-aware","The same as MODI","Based on penalties"],1],
+["Which initial method usually gives the best starting cost Z₀?",["Northwest Corner","Random allocation","Vogel’s Approximation Method (VAM)","MODI"],2],
+["In the base data, the largest initial VAM penalty is 4, found in column:",["D1","D2","D3","D5"],2],
+["In the base data, the initial VAM penalty of row S1 (skipping the prohibited cell) is:",["2","1","4","3"],0],
+["In VAM, the quantity allocated to a chosen cell equals:",["The remaining supply plus the remaining demand","The larger of supply and demand","The cell cost","min(remaining supply, remaining demand)"],3],
+["The initial cost Z₀ is computed as:",["The sum of supplies","Σ (allocated units × c_ij)","The sum of all costs in the matrix","The number of basic cells"],1],
+["In MODI, the potentials satisfy u_i + v_j = c_ij for:",["BASIC cells","NONBASIC cells","All cells","Prohibited cells only"],0],
+["In MODI, the entering cell is the nonbasic cell with:",["The largest positive Δ","The smallest cost","The most negative Δ","The largest supply"],2],
+["In the closed loop, θ is:",["The largest allocation at a (−) corner","The smallest allocation at a (−) corner","The smallest allocation at a (+) corner","The entering cell cost"],1],
+["Scenario A: costs in column D4 rise by 20%. The new cost of S3→D4 (was 5) is:",["5.2","7.0","6.5","6.0"],3],
+["Scenario B: D2 = 35 and D5 = 15 (others unchanged). The total demand is:",["170, still balanced","180","160","175"],0]
+];
+let Q=BANK.concat(LEC,L5);
+const SECS=[["أسئلة البنك",BANK],["أسئلة المحاضرات",LEC.concat(L5)]];
+const L="ABCD";let R=0,W=0,answered=0;
+const list=document.getElementById("list");
+function draw(){
+  list.innerHTML="";R=W=answered=0;upd();
+  document.getElementById("done").style.display="none";
+  SECS.forEach(([name,arr])=>{const hd=document.createElement("h2");hd.className="sec";hd.textContent=name;list.appendChild(hd);
+  arr.forEach((q,i)=>{
+    const d=document.createElement("div");d.className="q";
+    const h=document.createElement("h2");h.textContent=(Q.indexOf(q)+1)+". "+q[0];d.appendChild(h);
+    const btns=q[1].map((t,j)=>{
+      const b=document.createElement("button");b.className="opt";b.textContent=L[j]+") "+t;
+      b.onclick=()=>pick(btns,j,q[2]);d.appendChild(b);return b;
+    });
+    list.appendChild(d);
+  });});
+}
+function pick(btns,j,c){
+  btns.forEach(b=>b.disabled=true);
+  btns[c].classList.add("ok");
+  if(j===c)R++;else{W++;btns[j].classList.add("bad");}
+  answered++;upd();
+  if(answered===Q.length){
+    const d=document.getElementById("done");
+    d.textContent="خلصت! النتيجة: "+R+" / "+Q.length;d.style.display="block";
+  }
+}
+function upd(){document.getElementById("r").textContent=R;document.getElementById("w").textContent=W;}
+document.getElementById("reset").onclick=()=>{draw();window.scrollTo(0,0);};
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
+  const lec=t.dataset.b==="lec";Q=lec?LEC:BANK;
+  document.getElementById("ttl").textContent=lec?"أسئلة المحاضرات":"أسئلة البنك";
+  document.getElementById("sub").textContent=lec?"Lectures 2 & 3 — 30 questions":"Operations Research Question Bank";
+  draw();window.scrollTo(0,0);
+});
+draw();
+</script>
+</body>
+</html>
